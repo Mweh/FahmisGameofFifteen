@@ -13,10 +13,16 @@ import java.lang.reflect.Array;
 import java.util.Random;
 
 import static java.lang.Thread.sleep;
+import android.widget.Chronometer;
+import android.os.SystemClock;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     Button btnPlay;
     Button[] buttons;
+    private Chronometer chronometer;
+    private long pauseOffset;
+    private boolean running;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +30,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         createButtons();
+
+        chronometer = findViewById(R.id.chronometer);
+        chronometer.setFormat("Time: %s");
+        chronometer.setBase(SystemClock.elapsedRealtime());
+
+//        chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
+//            @Override
+//            public void onChronometerTick(Chronometer chronometer) {
+//                if ((SystemClock.elapsedRealtime() - chronometer.getBase()) >= 10000) {
+//                    chronometer.setBase(SystemClock.elapsedRealtime());
+//                    Toast.makeText(MainActivity.this, "Bing!", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        });
 
         btnPlay = findViewById(R.id.btnPlay);
 
@@ -40,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if(btnTxt.equals("New game")){
+                    resetChronometer();
                     for(int i = 1; i < buttons.length; i++){
                         buttons[i-1].setText("" + i);
                     }
@@ -48,12 +69,14 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if(btnTxt.equals("Pause")){
                     btnPlay.setText("Continue");
-                    btnPlay.setTextSize(30);
+                    btnPlay.setTextSize(25);
                 }
                 if(btnTxt.equals("Continue")){
                     btnPlay.setText("Pause");
 
                 }
+
+                startChronometer();
             }
         });
 
@@ -74,6 +97,27 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    public void startChronometer() {
+        if (!running) {
+            chronometer.setBase(SystemClock.elapsedRealtime() - pauseOffset);
+            chronometer.start();
+            running = true;
+        }
+    }
+
+    public void pauseChronometer() {
+        if (running) {
+            chronometer.stop();
+            pauseOffset = SystemClock.elapsedRealtime() - chronometer.getBase();
+            running = false;
+        }
+    }
+
+    public void resetChronometer() {
+        chronometer.setBase(SystemClock.elapsedRealtime());
+        pauseOffset = 0;
     }
 
     public void alertWin(){
