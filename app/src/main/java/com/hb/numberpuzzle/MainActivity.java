@@ -2,27 +2,16 @@ package com.hb.numberpuzzle;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
-
-import java.lang.reflect.Array;
 import java.util.Random;
-
-import static java.lang.Thread.sleep;
-import android.widget.Chronometer;
-import android.os.SystemClock;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     Button btnPlay;
+    Button btnExit;
     Button[] buttons;
-    private Chronometer chronometer;
-    private long pauseOffset;
-    private boolean running;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,20 +19,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         createButtons();
-
-        chronometer = findViewById(R.id.chronometer);
-        chronometer.setFormat("Time: %s");
-        chronometer.setBase(SystemClock.elapsedRealtime());
-
-//        chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
-//            @Override
-//            public void onChronometerTick(Chronometer chronometer) {
-//                if ((SystemClock.elapsedRealtime() - chronometer.getBase()) >= 10000) {
-//                    chronometer.setBase(SystemClock.elapsedRealtime());
-//                    Toast.makeText(MainActivity.this, "Bing!", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
 
         btnPlay = findViewById(R.id.btnPlay);
 
@@ -56,11 +31,9 @@ public class MainActivity extends AppCompatActivity {
                     for(int i = 0; i < 300; i++){
                         randomNumber(checkCellEmpty());
                     }
-                    btnPlay.setText("New game");
+                    btnPlay.setText("RETRY");
                 }
-
-                if(btnTxt.equals("New game")){
-                    resetChronometer();
+                if(btnTxt.equals("RETRY")){
                     for(int i = 1; i < buttons.length; i++){
                         buttons[i-1].setText("" + i);
                     }
@@ -73,10 +46,16 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if(btnTxt.equals("Continue")){
                     btnPlay.setText("Pause");
-
                 }
 
-                startChronometer();
+            }
+        });
+
+        btnExit = findViewById(R.id.btnExit);
+        btnExit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
 
@@ -99,36 +78,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void startChronometer() {
-        if (!running) {
-            chronometer.setBase(SystemClock.elapsedRealtime() - pauseOffset);
-            chronometer.start();
-            running = true;
-        }
-    }
-
-    public void pauseChronometer() {
-        if (running) {
-            chronometer.stop();
-            pauseOffset = SystemClock.elapsedRealtime() - chronometer.getBase();
-            running = false;
-        }
-    }
-
-    public void resetChronometer() {
-        chronometer.setBase(SystemClock.elapsedRealtime());
-        pauseOffset = 0;
-    }
-
     public void alertWin(){
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Congratulations, You Won!");
-        alert.setIcon(R.mipmap.youwin1);
-        alert.setMessage("Best Time: unknow\n\nTime: unknow");
+        alert.setTitle("You win it!");
         alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
             }
         });
         alert.show();
@@ -139,7 +94,6 @@ public class MainActivity extends AppCompatActivity {
         buttons[buttons.length - 1].setText("");
         btnPlay.setText("Play");
     }
-
     public  void createButtons(){
         buttons = new Button[16];
 
@@ -149,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
             buttons[i] = ((Button) findViewById(resID));
         }
     }
-
     public void randomNumber(int cellEmpty){
         Random random = new Random();
         switch(cellEmpty) {
@@ -264,12 +217,7 @@ public class MainActivity extends AppCompatActivity {
         buttons[position].setText(buttons[position + 4].getText());
         buttons[position + 4].setText(tmp);
     }
-
-    // 0: do nothing
-    // 1: move up
-    // 2: move right
-    // 3: move down
-    // 4: move left
+    // 0: do nothing 1: move up 2: move right 3: move down 4: move left
     public int isMove(int cur_position){
         switch(cur_position) {
             case 0:
@@ -315,12 +263,10 @@ public class MainActivity extends AppCompatActivity {
                 if((buttons[cur_position + 1].getText()).equals("")) return 2;
                 if((buttons[cur_position - 4].getText()).equals("")) return 1;
                 break;
-
             default:
         }
         return 0;
     }
-
     public int checkCellEmpty(){
         for (int i = 0; i < 16; i++){
             String number = String.valueOf(buttons[i].getText());
